@@ -5,6 +5,8 @@ import { loadImage } from "@/lib/image/loader";
 import { generatePdf, downloadPdf } from "@/lib/pdf/generator";
 import { scanDocumentAPI, blobToDataUrl } from "@/lib/api/scan";
 
+type ColorMode = "bw" | "color";
+
 interface UseImageProcessorReturn {
   originalImage: string | null;
   processedImage: string | null;
@@ -12,8 +14,10 @@ interface UseImageProcessorReturn {
   isGeneratingPdf: boolean;
   error: string | null;
   filename: string | null;
+  colorMode: ColorMode;
   handleImageSelect: (file: File) => Promise<void>;
   handleDownload: () => Promise<void>;
+  setColorMode: (mode: ColorMode) => void;
   reset: () => void;
 }
 
@@ -24,12 +28,38 @@ export function useImageProcessor(): UseImageProcessorReturn {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
+  const [colorMode, setColorModeState] = useState<ColorMode>("bw");
 
   const serverBlobRef = useRef<Blob | null>(null);
+  const fileRef = useRef<File | null>(null);
+
+  const processWithMode = useCallback(async (file: File, mode: ColorMode) => {
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const blob = await scanDocumentAPI(file, {
+        mode,
+        blockSize: 15,
+        offset: 10,
+        format: "png",
+        maxSize: 2048,
+      });
+
+      serverBlobRef.current = blob;
+      const dataUrl = await blobToDataUrl(blob);
+      setProcessedImage(dataUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Processing failed");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
 
   const handleImageSelect = useCallback(async (file: File) => {
     setError(null);
     setFilename(file.name);
+    fileRef.current = file;
     setIsProcessing(true);
 
     try {
@@ -54,24 +84,20 @@ export function useImageProcessor(): UseImageProcessorReturn {
       ctx?.drawImage(img, 0, 0, width, height);
       setOriginalImage(originalCanvas.toDataURL("image/jpeg", 0.9));
 
-      // Process with server API
-      const blob = await scanDocumentAPI(file, {
-        mode: "bw",
-        blockSize: 15,
-        offset: 10,
-        format: "png",
-        maxSize: 2048,
-      });
-
-      serverBlobRef.current = blob;
-      const dataUrl = await blobToDataUrl(blob);
-      setProcessedImage(dataUrl);
+      // Process with server API using current color mode
+      await processWithMode(file, colorMode);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Processing failed");
-    } finally {
       setIsProcessing(false);
     }
-  }, []);
+  }, [colorMode, processWithMode]);
+
+  const setColorMode = useCallback((mode: ColorMode) => {
+    setColorModeState(mode);
+    if (fileRef.current) {
+      processWithMode(fileRef.current, mode);
+    }
+  }, [processWithMode]);
 
   const handleDownload = useCallback(async () => {
     if (!serverBlobRef.current) {
@@ -120,7 +146,9 @@ export function useImageProcessor(): UseImageProcessorReturn {
     setIsGeneratingPdf(false);
     setError(null);
     setFilename(null);
+    setColorModeState("bw");
     serverBlobRef.current = null;
+    fileRef.current = null;
   }, []);
 
   return {
@@ -130,8 +158,10 @@ export function useImageProcessor(): UseImageProcessorReturn {
     isGeneratingPdf,
     error,
     filename,
+    colorMode,
     handleImageSelect,
     handleDownload,
+    setColorMode,
     reset,
   };
 }

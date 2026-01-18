@@ -13,8 +13,10 @@ export default function Home() {
     isGeneratingPdf,
     error,
     filename,
+    colorMode,
     handleImageSelect,
     handleDownload,
+    setColorMode,
     reset,
   } = useImageProcessor();
 
@@ -47,13 +49,39 @@ export default function Home() {
               disabled={isProcessing}
             />
           ) : (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-4">
               <button
                 onClick={reset}
                 className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
               >
                 Upload different image
               </button>
+
+              {/* Color Mode Toggle */}
+              <div className="inline-flex rounded-lg border border-neutral-200 bg-white p-1">
+                <button
+                  onClick={() => setColorMode("bw")}
+                  disabled={isProcessing}
+                  className={`rounded-md px-4 py-1.5 text-sm transition-colors ${
+                    colorMode === "bw"
+                      ? "bg-neutral-900 text-white"
+                      : "text-neutral-600 hover:text-neutral-900"
+                  } ${isProcessing ? "opacity-50" : ""}`}
+                >
+                  B&W
+                </button>
+                <button
+                  onClick={() => setColorMode("color")}
+                  disabled={isProcessing}
+                  className={`rounded-md px-4 py-1.5 text-sm transition-colors ${
+                    colorMode === "color"
+                      ? "bg-neutral-900 text-white"
+                      : "text-neutral-600 hover:text-neutral-900"
+                  } ${isProcessing ? "opacity-50" : ""}`}
+                >
+                  Color
+                </button>
+              </div>
             </div>
           )}
 
