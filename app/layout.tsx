@@ -99,7 +99,7 @@ export const metadata: Metadata = {
       "Transform any image into a professional scanned PDF in seconds. Free, private, and works entirely in your browser. No sign-up required.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
         alt: "ScanConv - Free Online Document Scanner",
@@ -112,18 +112,17 @@ export const metadata: Metadata = {
     title: "ScanConv - Free Online Document Scanner",
     description:
       "Convert any image to a professional scanned PDF. Free, private, browser-based. No sign-up needed.",
-    images: ["/og-image.png"],
+    images: ["/twitter-image"],
     creator: "@scanconv",
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icon", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512", sizes: "512x512", type: "image/png" },
     ],
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon", sizes: "180x180", type: "image/png" },
     ],
   },
   manifest: "/manifest.json",
@@ -173,7 +172,7 @@ const jsonLd = {
         "No account required",
         "Privacy-first - no uploads to server",
       ],
-      screenshot: `${siteUrl}/og-image.png`,
+      screenshot: `${siteUrl}/opengraph-image`,
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: "4.9",
@@ -189,7 +188,7 @@ const jsonLd = {
       url: siteUrl,
       logo: {
         "@type": "ImageObject",
-        url: `${siteUrl}/icon-512.png`,
+        url: `${siteUrl}/icon-512`,
         width: 512,
         height: 512,
       },
